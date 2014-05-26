@@ -1,6 +1,6 @@
 /**********************************************************************************/
 /*   Usage:
-          Some useful functions relate to big integer number(the number which can't store by long long).
+          Some useful functions to deal with big integer number(the number which can't store by long long).
           1.transform string into big number structure, or transform big number structure to string
           2.basic calculation of big number.(+, -, *, /)
           3.print big numbers by string.
@@ -456,7 +456,7 @@ void divide(string ts, string ds, string& ans){
                i++;
                ans.push_back('0');
                tempt.push_back(ts[ds_size]);
-               
+
                int g = new_guxuan(tempt, mult);
                ans.push_back('0' + g);
                ts_B = ts_B - (BigNumber(g) * ds_Big);
