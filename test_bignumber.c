@@ -15,13 +15,13 @@ int main(){
 		intxx f;
 
 		c = a + b;
-		c.print_number();
+		c.print_number_oneline();
 		d = a - b;
-		d.print_number();
+		d.print_number_oneline();
 		e = a * b;
-		e.print_number();
+		e.print_number_oneline();
 		f = a / b;
-		f.print_number();		
+		f.print_number_oneline();		
 	}
 	return 0;
 } 
