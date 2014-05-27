@@ -28,6 +28,8 @@ using namespace std;
 *    3. >_< ?
 *    4. statement
 *    5. big_to_s, s_to_big??
+*    6. 效能, memory
+*    7.http://stackoverflow.com/a/12975602/2678970
 */
 
 class BigNumber{
@@ -51,11 +53,11 @@ class BigNumber{
           void make_vector(vector<int>&, int);
           void make_vector1();
           void make_vector2();
-          string num_str; //original string type
+          string num_str; //original string type // only positive(rename)
           bool neg; // negative or not
           int deg; //位數
           vector<int> vec1; //used in +, - //use string or int???
-          vector<int> vec2; //used in *, /
+          vector<int> vec2; //used in *
           int getvec1(int);
           int getvec2(int);
           BigNumber minus(BigNumber&);
@@ -66,7 +68,7 @@ class BigNumber{
 };
 typedef class BigNumber intxx;
 
-bool BigNumber::compare_string_eq(BigNumber& a, BigNumber& b){
+bool BigNumber::compare_string_eq(BigNumber& a, BigNumber& b){//!! rename:compare_with_string
      return a.get_string_number() >= b.get_string_number();
 }
 bool BigNumber::compare_string(BigNumber& a, BigNumber& b){
@@ -86,7 +88,10 @@ void BigNumber::print_number(){
      puts(this->num_str.c_str());
 }
 string BigNumber::get_string_number(){
-     return this->num_str;
+     string full_string = this->num_str;
+     if(neg)
+          full_string.insert(0, "-");
+     return full_string;
 }
 void BigNumber::set_number(string s){
      this->init(s);
@@ -108,6 +113,7 @@ void BigNumber::init(string s){
 BigNumber::BigNumber(){
      this->init("");
 }
+
 BigNumber::BigNumber(string s){
      this->init(s);
 }
@@ -122,10 +128,10 @@ BigNumber::BigNumber(long long l){
      this->init(temp);
 }
 //!!not ok
-BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//type 1 = vec1, 2 = *, 3 = / 
+BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//type 1 = +, - , 2 = *
      int i;
      string s, temps;
-     char* tempc = (char*)malloc(sizeof(char) * 14);
+     char tempc[14];
      if(neg)
           s.append("-");
      int lo = vec.size();
@@ -413,17 +419,51 @@ BigNumber BigNumber::operator*(BigNumber multiplied){
      return BigNumber(ans, 2, isneg);
 }
 
-int new_guxuan(string tempt, vector<class BigNumber>& mult){//binary??
+bool compare_positive_string_number(string a, string b){ // if a >= b, return true, if a < b, return false
+     while(a[0] == '0'){
+          a.erase(0, 1);
+     }
+     while(b[0] == '0'){
+          b.erase(0, 1);
+     }
+     if(a.size() != b.size()){
+          return a.size() > b.size();
+     } else {
+          for(int i = 0; i < a.size(); i++){
+               if(a[i] != b[i]){
+                    return a[i] > b[i];
+               }
+          }
+     }
+     return true;
+}
+
+int new_guxuan(string tempt, vector<string>& mult){//binary??
      //int start = 1, end = 9;
      //int mid = (start + end) / 2;
      //while(mid)
-     class BigNumber bigtemp(tempt);
      for(int i = 9; i >= 1; i--){
-          BigNumber temp = mult[i];
-          if(bigtemp >= temp)//有算degree??
+          if(compare_positive_string_number(tempt, mult[i]))//if(tempt >= mult[i]), 有算degree??
                return i;
      }
      return -1;
+}
+
+void string_minus(string& a, string b){
+     printf("%s - %s =", a.c_str(), b.c_str());
+     int a_size = a.size()-1;//index
+     int b_size = b.size()-1;//index(-1)
+     for(int i = 0; i <= b_size; i++){
+          a[a_size - i] -= b[b_size - i] - '0';
+          if(a[a_size - i] < '0'){
+               a[a_size - i] += 10;
+               a[a_size - i - 1] -= 1;
+          }
+     }
+     while(a[0] == '0'){
+          a.erase(0, 1);
+     }
+     printf("%s\n", a.c_str());
 }
 
 void divide(string ts, string ds, string& ans){
@@ -431,42 +471,50 @@ void divide(string ts, string ds, string& ans){
      int ds_size = ds.size();
      BigNumber ts_B = BigNumber(ts);
 
-     vector<class BigNumber> mult(10);
+     vector<string> mult(10);
      BigNumber ds_Big = BigNumber(ds);
      for(int i = 1; i < 10; i++){
-          mult[i] = BigNumber(i) * ds_Big;
+          mult[i] = (BigNumber(i) * ds_Big).get_string_number();
      }
 
      string tempt;
      const int MAX_ANS_DEGREE = ts_size - ds_size + 1;
+          
      for(int i = 0 ; i < MAX_ANS_DEGREE; i++){
           if(ts.size() < ds_size)
                break;
-          tempt.assign(ts, 0, ds_size);//先取ds_size個數的數
-          //printf("tempt = %s\n", tempt.c_str());
-          if(tempt >= ds){//被除數較大
+          if(i == 0)
+               tempt.assign(ts, 0, ds_size);//先取ds_size個數的數 //改成多加一位的方式
+          else
+               tempt.push_back(ts[tempt.size()]);
+          printf("tempt = %s\n", tempt.c_str());
+          if(compare_positive_string_number(tempt, ds)){//被除數較大
                int g = new_guxuan(tempt, mult);
                ans.push_back('0' + g);
-               ts_B = ts_B - (BigNumber(g) * ds_Big);
-               ts = ts_B.get_string_number();
+               
+               int tempt_size = tempt.size();
+               string_minus(tempt, mult[g]);
+               ts.erase(0, tempt_size);
+               ts.insert(0, tempt);
+               //ts.replace(0, ds_size, tempt);
+               //ts_B = ts_B - (BigNumber(g) * ds_Big);
+               //ts = ts_B.get_string_number();
           } else {//被除數較小
-               if(ts.size() == ds_size)//同長度，且被除數較小
+               if(ts.size() + tempt.size() == ds_size)//同長度，且被除數較小
                     break;
                //加一位，再算
-               i++;
                ans.push_back('0');
-               tempt.push_back(ts[ds_size]);
-
-               int g = new_guxuan(tempt, mult);
-               ans.push_back('0' + g);
-               ts_B = ts_B - (BigNumber(g) * ds_Big);
-               ts = ts_B.get_string_number();
           }
+          printf("nowans: %s, ts = %s\n", ans.c_str(), ts.c_str());
      }
      //補齊0？
      int ans_size = ans.size();
-     for(i = 0; i < MAX_ANS_DEGREE - ans_size; i++){
+     for(int i = 0; i < MAX_ANS_DEGREE - ans_size; i++){
           ans.push_back('0');
+     }
+     //去除前方的0
+     while(ans[0] == '0'){
+          ans.erase(0, 1);
      }
 }
 
