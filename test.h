@@ -24,8 +24,6 @@ using namespace std;
 
 /*
 *    NOW Progress:
-*    1. Deal with negative number => +, - ok
-*    3. >_< ?
 *    4. statement
 *    5. big_to_s, s_to_big??
 *    6. 效能, memory
@@ -44,8 +42,8 @@ class BigNumber{
           bool operator>(BigNumber&);
           bool operator>=(BigNumber&);
           bool operator==(BigNumber&);
-          // todo +=, ... 
-          string get_bignumber_string();//get string type of Bignumber
+          // todo +=, < , ... 
+          string get_bignumber_string();//get Bignumber in string type
           void print_number();
           void print_number_oneline();//print in a line
           bool check_multiply_divide_negative(bool, bool);
