@@ -48,6 +48,7 @@ class BigNumber{
           string get_bignumber_string();//get string type of Bignumber
           void print_number();
           void print_number_oneline();//print in a line
+          bool check_multiply_divide_negative(bool, bool);
      private: 
           bool is_bignumber_abs_greater(BigNumber&);
           bool is_bignumber_abs_geq(BigNumber&);
@@ -66,6 +67,17 @@ class BigNumber{
 };
 typedef class BigNumber intxx;
 
+
+bool BigNumber::check_multiply_divide_negative(bool a, bool b){
+     if(a || b){
+          if(a && b)
+               return false;
+          else
+               return true;
+     } else {
+          return false;
+     }       
+}
 
 bool is_string_abs_geq(string a, string b){ // if a >= b, return true, if a < b, return false
      while(a[0] == '0')
@@ -428,15 +440,8 @@ BigNumber BigNumber::operator*(BigNumber multiplied){
      if(this->abs_string == "0" || multiplied.abs_string == "0")//ans = zero
           return BigNumber("0");
      else{
-          if(this->neg || multiplied.neg){
-               if(this->neg && multiplied.neg)
-                    isneg = false;
-               else
-                    isneg = true;
-          } else{
-               isneg = false;
-          }
-
+          isneg = check_multiply_divide_negative(this->neg, multiplied.neg);
+          
           ans.assign(loa + lob, 0);//initialized to zero
           for(int i = 1; i < loa; i++)//from 1
                for(int j = 1; j < lob; j++){
@@ -535,17 +540,6 @@ void divide(string ts, string ds, string& ans){
      }
 }
 
-bool check_multiply_divide_negative(bool a, bool b){
-     if(a || b){
-          if(a && b)
-               return false;
-          else
-               return true;
-     } else {
-          return false;
-     }       
-}
-
 BigNumber BigNumber::operator/(BigNumber devidend){//not sure
      int loa = this->vec2.size();
      int lob = devidend.vec2.size();
@@ -564,17 +558,8 @@ BigNumber BigNumber::operator/(BigNumber devidend){//not sure
                     break;
           }
      }
-    
-     bool isneg;
 
-     if(this->neg || devidend.neg){
-          if(this->neg && devidend.neg)
-               isneg = false;
-          else
-               isneg = true;
-     } else {
-          isneg = false;
-     }
+     bool isneg = check_multiply_divide_negative(this->neg, devidend.neg);
 
      string ans;
      divide(this->abs_string, devidend.abs_string, ans);

@@ -6,14 +6,9 @@ int main(){
 	while(scanf("%s %s", str_a, str_b) == 2){
 		intxx a(str_a);
 		intxx b(str_b);
-		//a.print_number();
-		//b.print_number();
-
-		intxx c; // no need to 括號？
-		intxx d;
-		intxx e;
-		intxx f;
-
+		
+		intxx c, d, e, f; // no need to 括號？
+		
 		c = a + b;
 		c.print_number_oneline();
 		d = a - b;
