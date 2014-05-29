@@ -19,14 +19,16 @@
 #include <sstream>
 #include <string>
 #include <string.h>
-#define VEC1N 1000000000
+#define MAX_VEC1 1000000000
+#define MAX_VEC2 10000
 using namespace std;
 
 /*
 *    NOW Progress:
+*    3. some constant values (const)
 *    4. statement
-*    5. big_to_s, s_to_big??
 *    6. 效能, memory
+*    8. +-* / template
 *    7.http://stackoverflow.com/a/12975602/2678970
 */
 
@@ -39,32 +41,33 @@ class BigNumber{
           BigNumber operator-(BigNumber);
           BigNumber operator*(BigNumber);
           BigNumber operator/(BigNumber);
+          template <class T> void operator=(T);// assign any value into BigNumber structure
           bool operator>(BigNumber&);
           bool operator>=(BigNumber&);
           bool operator==(BigNumber&);
+          bool operator<(BigNumber&);
           // todo +=, < , ... 
           string get_bignumber_string();//get Bignumber in string type
           void print_number();
           void print_number_oneline();//print in a line
           bool check_multiply_divide_negative(bool, bool);
      private: 
-          bool is_bignumber_abs_greater(BigNumber&);
-          bool is_bignumber_abs_geq(BigNumber&);
           void reset_number(string);
           void init(string);
+          bool is_bignumber_abs_greater(BigNumber&);
+          bool is_bignumber_abs_geq(BigNumber&);
           void make_vector(vector<int>&, int);
           void make_vector1();
           void make_vector2();
           BigNumber minus(BigNumber&);
           BigNumber add(BigNumber&);
           bool neg; // negative or not
-          string abs_string;
+          string unsigned_string;
           int deg; //位數
           vector<int> vec1; //used in +, -
           vector<int> vec2; //used in *
 };
 typedef class BigNumber intxx;
-
 
 bool BigNumber::check_multiply_divide_negative(bool a, bool b){
      if(a || b){
@@ -77,64 +80,61 @@ bool BigNumber::check_multiply_divide_negative(bool a, bool b){
      }       
 }
 
-bool is_string_abs_geq(string a, string b){ // if a >= b, return true, if a < b, return false
-     while(a[0] == '0')
+int compare_string_abs(string a, string b){
+      while(a[0] == '0' || a[0] == '-')
           a.erase(0, 1);
-     while(b[0] == '0')
+     while(b[0] == '0' || b[0] == '-')
           b.erase(0, 1);
      if(a.size() != b.size()){
-          return a.size() > b.size();
+          return a.size() - b.size();
      } else {
           for(int i = 0; i < a.size(); i++){
                if(a[i] != b[i]){
-                    return a[i] > b[i];
+                    return a[i] - b[i];
                }
           }
      }
-     return true;
-}
-bool is_string_abs_greater(string a, string b){ // if a >= b, return true, if a < b, return false
-     while(a[0] == '0')
-          a.erase(0, 1);
-     while(b[0] == '0')
-          b.erase(0, 1);
-     if(a.size() != b.size()){
-          return a.size() > b.size();
-     } else {
-          for(int i = 0; i < a.size(); i++){
-               if(a[i] != b[i]){
-                    return a[i] > b[i];
-               }
-          }
-     }
-     return false;
+     return 0;
 }
 
-bool BigNumber::is_bignumber_abs_greater(BigNumber& b){//only used when string is in the same degree
+bool is_string_abs_geq(string a, string b){
+     int cmp_value = compare_string_abs(a, b);
+     if(cmp_value == 0)
+          return true;
+     else
+          return (cmp_value > 0);
+}
+bool is_string_abs_greater(string a, string b){
+     int cmp_value = compare_string_abs(a, b);
+     if(cmp_value == 0)
+          return false;
+     else
+          return (cmp_value > 0);
+}
+
+bool BigNumber::is_bignumber_abs_greater(BigNumber& b){
      return is_string_abs_greater(this->get_bignumber_string(), b.get_bignumber_string());
 }
-bool BigNumber::is_bignumber_abs_geq(BigNumber& b){//greater or equal >= 
+bool BigNumber::is_bignumber_abs_geq(BigNumber& b){
      return is_string_abs_geq(this->get_bignumber_string(), b.get_bignumber_string());
 }
 
 bool BigNumber::operator>(BigNumber &comp){
-     if(!this->neg && comp.neg){
+     if(!this->neg && comp.neg){//+  > -
           return true;
-     }else if(this->neg && !comp.neg){   
+     }else if(this->neg && !comp.neg){// - < +
           return false;
      } else{
-          if(this->neg){//all negative
-               if(this->deg != comp.deg){
+          if(this->neg){//- -
+               if(this->deg != comp.deg)
                     return this->deg < comp.deg;
-               } else{
+               else
                     return !this->is_bignumber_abs_geq(comp);
-               }
-          } else{//all positive
-               if(this->deg != comp.deg){
+          } else{//+ +
+               if(this->deg != comp.deg)
                     return this->deg > comp.deg;
-               } else{
+               else
                     return this->is_bignumber_abs_greater(comp);
-               }
           }
      }
 }
@@ -144,36 +144,50 @@ bool BigNumber::operator==(BigNumber &comp){
           return false;  
      } else {
           for(int i = 0; i < this->deg; i++)
-               if(this->abs_string[i] != comp.abs_string[i])
+               if(this->unsigned_string[i] != comp.unsigned_string[i])
                     return false;
      }
      return true;
 }
 
 bool BigNumber::operator>=(BigNumber &comp){
-     if(*this > comp || *this == comp){
+     if(*this > comp || *this == comp){//you can't use >= instead unless you want infinite loop
           return true;
      } else {
           return false;
      }
 }
 
+bool BigNumber::operator<(BigNumber& comp){
+     return !(*this >= comp);
+}
+
 string BigNumber::get_bignumber_string(){
-     string full_string = this->abs_string;
+     string signed_string = this->unsigned_string;
      if(neg)
-          full_string.insert(0, "-");
-     return full_string;
+          signed_string.insert(0, "-");
+     return signed_string;
 }
 
 void BigNumber::print_number(){
      if(neg)
           putchar('-');
-     printf("%s", this->abs_string.c_str());
+     printf("%s", this->unsigned_string.c_str());
 }
 void BigNumber::print_number_oneline(){
-     if(neg)
-          putchar('-');
-     puts(this->abs_string.c_str());
+     this->print_number();
+     puts("");
+}
+
+
+template <class T>
+void BigNumber::operator= (T t){
+     BigNumber tempbignumber(t);
+     (*this) = tempbignumber;// call template bignumber
+}
+template <>
+void BigNumber::operator= <BigNumber>(BigNumber replace){
+     this->reset_number(replace.get_bignumber_string());
 }
 
 void BigNumber::reset_number(string s){
@@ -181,7 +195,7 @@ void BigNumber::reset_number(string s){
 }
 
 BigNumber::BigNumber(){
-     this->init("");
+     this->init("0");
 }
 
 template <class T>
@@ -206,28 +220,11 @@ void BigNumber::init(string s){
      } else {
           neg = false;
      }
-     this->abs_string = s;
+     this->unsigned_string = s;
      this->deg = s.size();
      this->make_vector1();
      this->make_vector2();
      return;
-}
-
-void BigNumber::make_vector(vector<int>& vec, int maxdeg){
-     //stringstream is much slower than atof
-     //so no use stringstream
-     //ref: http://tinodidriksen.com/2011/05/28/cpp-convert-string-to-double-speed/
-     vec.clear();
-     string temp, abs_string = this->abs_string;
-     int count = this->deg;
-     do{
-          count -= maxdeg;
-          if(count > 0)
-               temp.assign(abs_string, count, maxdeg);
-         else
-               temp.assign(abs_string, 0, count + maxdeg);//end of string
-          vec.push_back(atof(temp.c_str()));
-     }while(count > 0);//check
 }
 
 void BigNumber::make_vector1(){
@@ -237,97 +234,74 @@ void BigNumber::make_vector2(){
      this->make_vector(this->vec2, 4);
      this->vec2.insert(this->vec2.begin(), 0);//this zero is for ?? i don't know why... maybe look original code again?
 }
-
-BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = +, - , 2 = * //12345678999 - 12345678900
-     int i;
-     string s, temps;
-     char tempc[14];
-     if(neg)
-          s.append("-");
-     int lo = vec.size();
-     if(type == 1){
-          sprintf(tempc, "%d", vec[lo-1]);
-          //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-          s.append(string(tempc));
-          for(int i = lo-2; i >= 0; i--){
-               int way = 9; int temp = vec[i];
-               if(vec[i] == 0)
-                    s.append("00000000");
-               else{
-                    while(temp != 0){
-                         temp /= 10;
-                         way--;
-                    }
-                    while(way-- != 0)
-                         s.append("0");
-               }
-               sprintf(tempc, "%d", vec[i]);
-               //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-               s.append(string(tempc));
-          }
-     } else if(type == 2){
-          int way, tempa, real;
-          real = lo-1;
-          while(vec[real] == 0)
-               real--;
-          sprintf(tempc, "%d", vec[real]);
-          //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-          s.append(string(tempc));
-          for(i = real-1; i >= 2; i--){
-               way = 4; tempa = vec[i];
-               if(vec[i] == 0)
-                    s.append("000");
-               else{
-                    while(tempa != 0){
-                         tempa /= 10;
-                         way--;
-                    }
-                    while(way-- != 0)
-                         s.append("0");
-               }
-               sprintf(tempc, "%d", vec[i]);
-               //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-               s.append(string(tempc));
-          }
-     } else if(type == 3){
-          int lo = vec.size();
-          for(int i = 0; i < lo ; i++){
-              sprintf(tempc, "%d", vec[i]);
-               //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-               s.append(string(tempc));
-          }
-     } else {
-          printf("type error!\n");
-     }
-     this->init(s);
+void BigNumber::make_vector(vector<int>& vec, int maxdeg){
+     //stringstream is much slower than atof
+     //so no use stringstream
+     //ref: http://tinodidriksen.com/2011/05/28/cpp-convert-string-to-double-speed/
+     vec.clear();
+     string temp, unsigned_string = this->unsigned_string;
+     int count = this->deg;
+     do{
+          count -= maxdeg;
+          if(count > 0)
+               temp.assign(unsigned_string, count, maxdeg);
+         else
+               temp.assign(unsigned_string, 0, count + maxdeg);//end of string
+          vec.push_back(atof(temp.c_str()));
+     }while(count > 0);//check
 }
 
-void make_bignumber_by_vec1(bool neg, vector<int>& vec){//todo: not ok
-     string s;
-     char tempc[14];
-     int lo = vec.size();
-     
-     if(neg)
-          s.append("-");
+string my_to_string(int v){
      //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-     sprintf(tempc, "%d", vec[lo-1]);
-     s.append(string(tempc)); //first one, no need to add forward zero
-     for(int i = lo-2; i >= 0; i--){
-          int way = 9; int temp = vec[i];
-          if(vec[i] == 0)
-               s.append("00000000");
+     char tempc[14];
+     sprintf(tempc, "%d", v);
+     return string(tempc);
+}
+
+void vector_to_string(vector<int> &vec, string &signed_string, int real, string append_zero, int ori_way, int i_end){
+     for(int i = real-1; i >= i_end; i--){
+          int temp = vec[i];
+          if(temp == 0)
+               signed_string.append(append_zero);
           else{
+               int way = ori_way;
                while(temp != 0){
                     temp /= 10;
                     way--;
                }
-               while(way--)
-                    s.append("0");
+               while(way-- != 0)
+                    signed_string.append("0");
+               signed_string.append(my_to_string(vec[i]));
           }
-          //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
-          sprintf(tempc, "%d", vec[i]);
-          s.append(string(tempc));
      }
+}
+
+BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = +, - , 2 = * //12345678999 12345678900
+     string signed_string;
+     if(neg)
+          signed_string.append("-");
+     int lo = vec.size();
+     int real = lo-1;
+     while(vec[real] == 0)
+          real--;
+     signed_string.append(my_to_string(vec[real]));
+     string append_zero;
+     int way;
+     int i_end;
+     if(type == 1){
+          append_zero = "00000000";
+          way = 9;
+          i_end = 0;
+     } else if(type == 2){
+          append_zero = "000";
+          way = 4;
+          i_end = 2;
+     } else {
+          printf("type error!\n");
+          return;
+     }
+     vector_to_string(vec, signed_string, real, append_zero, way, i_end);
+     this->init(signed_string);
 }
 
 BigNumber BigNumber::add(BigNumber& added){
@@ -344,8 +318,8 @@ BigNumber BigNumber::add(BigNumber& added){
                else
                     ans.push_back(this->vec1[i] + flow);
                
-               if(ans[i] >= VEC1N){
-                    ans[i] -= VEC1N;
+               if(ans[i] >= MAX_VEC1){
+                    ans[i] -= MAX_VEC1;
                     flow = 1;
                }
                else
@@ -358,8 +332,8 @@ BigNumber BigNumber::add(BigNumber& added){
                else
                       ans.push_back(added.vec1[i] + flow);
                
-               if(ans[i] >= VEC1N){
-                      ans[i] -= VEC1N;
+               if(ans[i] >= MAX_VEC1){
+                      ans[i] -= MAX_VEC1;
                       flow = 1;
                }
                else
@@ -372,24 +346,23 @@ BigNumber BigNumber::add(BigNumber& added){
 }
 
 BigNumber BigNumber::minus(BigNumber& minused){//todo 小減大problem
-     //先比大小
-     bool is_ans_neg = !this->is_bignumber_abs_greater(minused);
-     //大減小
-
      std::vector<int> ans;
      int loa = this->vec1.size();
      int lob = minused.vec1.size();
      int lo = (loa > lob)?loa:lob;
      int flow = 0;
 
-     if(is_ans_neg)//abstract
+     //先比大小
+     bool is_ans_pos = this->is_bignumber_abs_geq(minused);
+     //大減小
+     if(is_ans_pos)
           for(int i = 0; i < lo; i++){
                if(i < lob)//???
                     ans.push_back(this->vec1[i] - minused.vec1[i] - flow);
                else
                     ans.push_back(this->vec1[i] - flow);
                if(ans[i] < 0){
-                    ans[i] += VEC1N;
+                    ans[i] += MAX_VEC1;
                     flow = 1;
                }
                else
@@ -397,19 +370,19 @@ BigNumber BigNumber::minus(BigNumber& minused){//todo 小減大problem
           }
      else
           for(int i = 0; i < lo; i++){
-               if(i < lob)//????
+               if(i < loa)//????
                     ans.push_back(minused.vec1[i] - this->vec1[i] - flow);
                else
                     ans.push_back(minused.vec1[i] - flow);
                if(ans[i] < 0){
-                    ans[i] += VEC1N;
+                    ans[i] += MAX_VEC1;
                     flow = 1;
                }
                else
                     flow = 0;
           }
 
-     return BigNumber(ans, 1, !is_ans_neg);
+     return BigNumber(ans, 1, !is_ans_pos);
 }
 
 BigNumber BigNumber::operator+(BigNumber added){//int + big??
@@ -424,44 +397,37 @@ BigNumber BigNumber::operator+(BigNumber added){//int + big??
 
 BigNumber BigNumber::operator-(BigNumber minused){/* use stringstream to output the result to this->ori, instead of print*/
      minused.neg = !minused.neg;//被減數變號，然後相加
-     BigNumber ans = (*this) + minused;
-     return ans;
+     return (*this) + minused;
 }
 
-BigNumber BigNumber::operator*(BigNumber multiplied){
+BigNumber BigNumber::operator*(BigNumber multiplier){
      int loa = this->vec2.size();
-     int lob = multiplied.vec2.size();
+     int lob = multiplier.vec2.size();
      int lo = (loa>lob)?loa:lob;
      std::vector<int> ans;
 
      bool isneg;
-     if(this->abs_string == "0" || multiplied.abs_string == "0")//ans = zero
+     if(this->unsigned_string == "0" || multiplier.unsigned_string == "0")//ans = zero
           return BigNumber("0");
      else{
-          isneg = check_multiply_divide_negative(this->neg, multiplied.neg);
+          isneg = check_multiply_divide_negative(this->neg, multiplier.neg);
           
           ans.assign(loa + lob, 0);//initialized to zero
-          for(int i = 1; i < loa; i++)//from 1
-               for(int j = 1; j < lob; j++){
-                    ans[i + j] += (this->vec2[i] * multiplied.vec2[j]);
-                    
-                    if(ans[i + j] >= 10000){
-                         ans[i + j + 1] += ans[i + j] / 10000;
-                         ans[i + j] %= 10000;
-                    }
-               }
+          for(int i = 1; i < loa; i++)//start from 1
+               for(int j = 1; j < lob; j++)
+                    ans[i+j] += (this->vec2[i] * multiplier.vec2[j]);
           //最後再進位即可！
           lo = ans.size();
           for(int i = 0; i < lo; i++)
-               if(ans[i] >= 10000){
-                    ans[i+1] += ans[i] / 10000;
-                    ans[i] %= 10000;
+               if(ans[i] >= MAX_VEC2){
+                    ans[i+1] += ans[i] / MAX_VEC2;
+                    ans[i] %= MAX_VEC2;
                }
      }
      return BigNumber(ans, 2, isneg);
 }
 
-int new_guxuan(string tempt, vector<string>& mult){//binary??
+int new_guxuan(string tempt, vector<string>& mult){//binary?? // calculate the number of multiply
      //int start = 1, end = 9;
      //int mid = (start + end) / 2;
      //while(mid)
@@ -473,27 +439,23 @@ int new_guxuan(string tempt, vector<string>& mult){//binary??
 }
 
 void string_minus(string& a, string b){
-     printf("%s - %s =", a.c_str(), b.c_str());
      int a_size = a.size()-1;//index
      int b_size = b.size()-1;//index(-1)
      for(int i = 0; i <= b_size; i++){
-          a[a_size - i] -= b[b_size - i] - '0';
-          if(a[a_size - i] < '0'){
-               a[a_size - i] += 10;
-               a[a_size - i - 1] -= 1;
+          a[a_size-i] -= b[b_size-i] - '0';
+          if(a[a_size-i] < '0'){
+               a[a_size-i] += 10;
+               a[a_size-i-1] -= 1;
           }
      }
      while(a[0] == '0'){
           a.erase(0, 1);
      }
-     printf("%s\n", a.c_str());
 }
 
 void divide(string ts, string ds, string& ans){
      int ts_size = ts.size();
      int ds_size = ds.size();
-     BigNumber ts_B = BigNumber(ts);
-
      vector<string> mult(10);
      BigNumber ds_Big = BigNumber(ds);
      for(int i = 1; i < 10; i++){
@@ -510,7 +472,7 @@ void divide(string ts, string ds, string& ans){
                tempt.assign(ts, 0, ds_size);//先取ds_size個數的數 //改成多加一位的方式
           else
                tempt.push_back(ts[tempt.size()]);
-          //printf("tempt = %s\n", tempt.c_str());
+
           if(is_string_abs_geq(tempt, ds)){//被除數較大
                int g = new_guxuan(tempt, mult);
                ans.push_back('0' + g);
@@ -520,19 +482,19 @@ void divide(string ts, string ds, string& ans){
                ts.erase(0, tempt_size);
                ts.insert(0, tempt);
           } else {//被除數較小
-               if(ts.size() + tempt.size() == ds_size)//同長度，且被除數較小
+               if(ts.size() + tempt.size() == ds_size)//同長度，且被除數較小//todo ????
                     break;
                //加一位，再算
                ans.push_back('0');
           }
          // printf("nowans: %s, ts = %s\n", ans.c_str(), ts.c_str());
      }
-     //補齊0？
+     //補後方0
      int ans_size = ans.size();
      for(int i = 0; i < MAX_ANS_DEGREE - ans_size; i++){
           ans.push_back('0');
      }
-     //去除前方的0
+     //去除前方0
      while(ans[0] == '0'){
           ans.erase(0, 1);
      }
@@ -543,10 +505,10 @@ BigNumber BigNumber::operator/(BigNumber devidend){//not sure
      int lob = devidend.vec2.size();
      int lo = (loa>lob)?loa:lob;
 
-     if(devidend.abs_string == "0"){
+     if(devidend.unsigned_string == "0"){
           puts("Invalid operation: Divide by zero");
           return BigNumber("");//todo: what should be put in?
-     } else if(this->abs_string == "0" || loa < lob){//除數 = 0？
+     } else if(this->unsigned_string == "0" || loa < lob){//除數 = 0？
           return BigNumber("0");
      } else if(loa == lob){//同長度
           for(int i = loa-1; i >= 0;i--){
@@ -560,8 +522,8 @@ BigNumber BigNumber::operator/(BigNumber devidend){//not sure
      bool isneg = check_multiply_divide_negative(this->neg, devidend.neg);
 
      string ans;
-     divide(this->abs_string, devidend.abs_string, ans);
      if(isneg)
           ans.insert(0, "-");
+     divide(this->unsigned_string, devidend.unsigned_string, ans);
      return BigNumber(ans);
 }

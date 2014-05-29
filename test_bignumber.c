@@ -16,7 +16,7 @@ int main(){
 		e = a * b;
 		e.print_number_oneline();
 		f = a / b;
-		f.print_number_oneline();		
+		f.print_number_oneline();
 	}
 	return 0;
 } 
