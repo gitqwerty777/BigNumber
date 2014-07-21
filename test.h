@@ -45,11 +45,12 @@ class BigNumber{
           bool operator>(BigNumber&);
           bool operator>=(BigNumber&);
           bool operator==(BigNumber&);
+          bool operator!=(BigNumber&);
           bool operator<(BigNumber&);
           // todo +=, < , ... 
           string get_bignumber_string();//get Bignumber in string type
-          void print_number();
-          void print_number_oneline();//print in a line
+          void print();
+          void print_line();//print in a line
           bool check_multiply_divide_negative(bool, bool);
      private: 
           void reset_number(string);
@@ -150,6 +151,10 @@ bool BigNumber::operator==(BigNumber &comp){
      return true;
 }
 
+bool operator!=(BigNumber&){
+     return !(*this == comp);
+}
+
 bool BigNumber::operator>=(BigNumber &comp){
      if(*this > comp || *this == comp){//you can't use >= instead unless you want infinite loop
           return true;
@@ -169,12 +174,12 @@ string BigNumber::get_bignumber_string(){
      return signed_string;
 }
 
-void BigNumber::print_number(){
+void BigNumber::print(){
      if(neg)
           putchar('-');
      printf("%s", this->unsigned_string.c_str());
 }
-void BigNumber::print_number_oneline(){
+void BigNumber::print_line(){
      this->print_number();
      puts("");
 }
