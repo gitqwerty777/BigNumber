@@ -293,7 +293,7 @@ BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = 
           way = 9;
           i_end = 0;
      } else if(type == 2){
-          append_zero = "000";
+          append_zero = "0000";
           way = 4;
           i_end = 2;
      } else {
