@@ -24,6 +24,10 @@
 using namespace std;
 
 /*
+*    Known Bug:
+*    0 0
+*    前導0
+*    大位數減法
 *    NOW Progress:
 *    3. some constant values (const)
 *    4. statement
