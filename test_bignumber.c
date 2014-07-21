@@ -2,7 +2,7 @@
 #include "test.h"
 
 int main(){
-	char str_a[10000], str_b[10000];
+	char str_a[1000], str_b[1000];
 	while(scanf("%s %s", str_a, str_b) == 2){
 		intxx a(str_a);
 		intxx b(str_b);
@@ -10,13 +10,13 @@ int main(){
 		intxx c, d, e, f; // no need to 括號？
 		
 		c = a + b;
-		printf("+ = "); c.print_line();
+		c.print_number_oneline();
 		d = a - b;
-		printf("- = "); d.print_line();
+		d.print_number_oneline();
 		e = a * b;
-		printf("* = "); e.print_line();
+		e.print_number_oneline();
 		f = a / b;
-		printf("/ = "); f.print_line();
+		f.print_number_oneline();
 	}
 	return 0;
 } 
