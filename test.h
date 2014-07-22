@@ -25,9 +25,10 @@ using namespace std;
 
 /*
 *    Known Bug:
-*    0 0
-*    前導0
-*    大位數減法
+*    0 0 // ok -> by Bignumber() -> prevent real==0
+*    append -> insert
+*    前導0 -> ok
+*    大位數減法 
 *    NOW Progress:
 *    3. some constant values (const)
 *    4. statement
@@ -155,7 +156,7 @@ bool BigNumber::operator==(BigNumber &comp){
      return true;
 }
 
-bool operator!=(BigNumber&){
+bool BigNumber::operator!=(BigNumber& comp){
      return !(*this == comp);
 }
 
@@ -184,7 +185,7 @@ void BigNumber::print(){
      printf("%s", this->unsigned_string.c_str());
 }
 void BigNumber::print_line(){
-     this->print_number();
+     this->print();
      puts("");
 }
 
@@ -221,14 +222,17 @@ BigNumber::BigNumber<string>(string s){
      this->init(s);
 }
 
-
 void BigNumber::init(string s){
-     if(s[0] == '-'){
+	if(s[0] == '-'){
           neg = true;
           s.erase(0, 1);
      } else {
           neg = false;
      }
+	 while(s[0] == '0' && s[1] != '\0'){
+		 s.erase(0,1);
+     }
+	 // printf("after init = %s\n", s.c_str());
      this->unsigned_string = s;
      this->deg = s.size();
      this->make_vector1();
@@ -288,10 +292,10 @@ void vector_to_string(vector<int> &vec, string &signed_string, int real, string 
 BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = +, - , 2 = * //12345678999 12345678900
      string signed_string;
      if(neg)
-          signed_string.append("-");
+		 signed_string.insert(0, "-");//!!
      int lo = vec.size();
      int real = lo-1;
-     while(vec[real] == 0)
+     while(vec[real] == 0 && real > 0)//prevent real==0
           real--;
      signed_string.append(my_to_string(vec[real]));
      string append_zero;
@@ -310,6 +314,7 @@ BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = 
           return;
      }
      vector_to_string(vec, signed_string, real, append_zero, way, i_end);
+	 //printf("signed_string = %s\n", signed_string.c_str());
      this->init(signed_string);
 }
 
@@ -317,7 +322,7 @@ BigNumber BigNumber::add(BigNumber& added){
      int loa = this->vec1.size();
      int lob = added.vec1.size();
      int lo = (loa>lob)?loa:lob;
-     
+
      vector<int> ans;
      int flow = 0;
      if(loa >= lob)
@@ -360,8 +365,8 @@ BigNumber BigNumber::minus(BigNumber& minused){//todo 小減大problem
      int lob = minused.vec1.size();
      int lo = (loa > lob)?loa:lob;
      int flow = 0;
-
-     //先比大小
+	 
+	 //先比大小
      bool is_ans_pos = this->is_bignumber_abs_geq(minused);
      //大減小
      if(is_ans_pos)
@@ -390,8 +395,7 @@ BigNumber BigNumber::minus(BigNumber& minused){//todo 小減大problem
                else
                     flow = 0;
           }
-
-     return BigNumber(ans, 1, !is_ans_pos);
+	return BigNumber(ans, 1, !is_ans_pos);
 }
 
 BigNumber BigNumber::operator+(BigNumber added){//int + big??
