@@ -265,7 +265,7 @@ void BigNumber::make_vector(vector<int>& vec, int maxdeg){
 }
 
 string my_to_string(int v){
-     //temps = std::to_string(vec[lo-1]); //so good!! but it has some bug in g++
+     //temps = std::to_string(vec[lo-1]); //so good!! but there are some bug by using g++
      char tempc[14];
      sprintf(tempc, "%d", v);
      return string(tempc);
@@ -277,6 +277,12 @@ void vector_to_string(vector<int> &vec, string &signed_string, int real, string 
           if(temp == 0)
                signed_string.append(append_zero);
           else{
+			  //test
+			  //ref: http://stackoverflow.com/a/4133356
+			  /*			  char t[15];
+			  sprintf(t, "%0*d", ori_way, vec[i]);
+			  signed_string.append(string(t));*/
+			  //
                int way = ori_way;
                while(temp != 0){
                     temp /= 10;
@@ -291,11 +297,12 @@ void vector_to_string(vector<int> &vec, string &signed_string, int real, string 
 
 BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = +, - , 2 = * //12345678999 12345678900
      string signed_string;
+	 signed_string.clear();//!!?????!!
      if(neg)
 		 signed_string.insert(0, "-");//!!
      int lo = vec.size();
      int real = lo-1;
-     while(vec[real] == 0 && real > 0)//prevent real==0
+     while(vec[real] == 0 && real > 0)//prevent real==-1
           real--;
      signed_string.append(my_to_string(vec[real]));
      string append_zero;
