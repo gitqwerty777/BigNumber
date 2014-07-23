@@ -279,11 +279,12 @@ void vector_to_string(vector<int> &vec, string &signed_string, int real, string 
     else{
       //test
       //ref: http://stackoverflow.com/a/4133356
-      /*
+
 	char t[15];
-	printf(t, "%0*d", ori_way, vec[i]);
+	sprintf(t, "%0*d", ori_way, vec[i]);
 	signed_string.append(string(t));
-      */
+
+      /*
       int way = ori_way;
       while(temp != 0){
 	temp /= 10;
@@ -291,7 +292,8 @@ void vector_to_string(vector<int> &vec, string &signed_string, int real, string 
       }
       while(way-- != 0)
 	signed_string.append("0");
-      signed_string.append(my_to_string(vec[i]));
+	signed_string.append(my_to_string(vec[i]));
+      */
     }
   }
 }
@@ -310,7 +312,7 @@ BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = 
   int way;
   int i_end;
   if(type == 1){
-    append_zero = "00000000";
+    append_zero = "000000000";//test: add additional zero -> yes, it need 9 zero
     way = 9;
     i_end = 0;
   } else if(type == 2){
