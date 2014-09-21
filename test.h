@@ -53,7 +53,7 @@ class BigNumber{
   bool operator!=(BigNumber&);
   bool operator<(BigNumber&);
   // todo +=, < , ... 
-  string get_bignumber_string();//get Bignumber in string type
+  string get_string();//get Bignumber in string type
   void print();
   void print_line();//print in a line
   bool check_multiply_divide_negative(bool, bool);
@@ -119,10 +119,10 @@ bool is_string_abs_greater(string a, string b){
 }
 
 bool BigNumber::is_bignumber_abs_greater(BigNumber& b){
-  return is_string_abs_greater(this->get_bignumber_string(), b.get_bignumber_string());
+  return is_string_abs_greater(this->get_string(), b.get_string());
 }
 bool BigNumber::is_bignumber_abs_geq(BigNumber& b){
-  return is_string_abs_geq(this->get_bignumber_string(), b.get_bignumber_string());
+  return is_string_abs_geq(this->get_string(), b.get_string());
 }
 
 bool BigNumber::operator>(BigNumber &comp){
@@ -172,7 +172,7 @@ bool BigNumber::operator<(BigNumber& comp){
   return !(*this >= comp);
 }
 
-string BigNumber::get_bignumber_string(){
+string BigNumber::get_string(){
   string signed_string = this->unsigned_string;
   if(neg)
     signed_string.insert(0, "-");
@@ -197,7 +197,7 @@ void BigNumber::operator= (T t){
 }
   template <>
   void BigNumber::operator= <BigNumber>(BigNumber replace){
-    this->reset_number(replace.get_bignumber_string());
+    this->reset_number(replace.get_string());
   }
 
     void BigNumber::reset_number(string s){
@@ -481,7 +481,7 @@ void divide(string ts, string ds, string& ans){
   vector<string> mult(10);
   BigNumber ds_Big = BigNumber(ds);
   for(int i = 1; i < 10; i++){
-    mult[i] = (BigNumber(i) * ds_Big).get_bignumber_string();
+    mult[i] = (BigNumber(i) * ds_Big).get_string();
   }
 
   string tempt;
