@@ -10,7 +10,7 @@
      3.execution speed
      4.input with calculation form, parse and output the answer
      Language: CPP
-     Author: HCL start from 2014/02/03 to 2014/05/27
+     Author: HCL, 2014/02/03 
 */
 /**********************************************************************************/
 #include <iostream>

@@ -1,6 +1,6 @@
-main: test_bignumber.o
-	  g++ test_bignumber.c -o a
-test_bignumber.o: test_bignumber.c
-				  g++ test_bignumber.c -c 
+main: testBigNumber.o
+	g++ testBigNumber.o -o bignumber
+testBigNumber.o: testBigNumber.cpp bigNumber.h
+	g++ testBigNumber.cpp -c 
 clean:
-	rm -rf test_bignumber.o	
+	rm -rf *.o

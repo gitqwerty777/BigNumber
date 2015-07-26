@@ -1,18 +1,8 @@
-/**********************************************************************************/
-/*	Usage:
-		Some useful functions relate to big integer number(the number which can't store by long long).
-		1.transform string into big number structure, or transform big number structure to string
-		2.making basic big number calculation.(+, -, *, /)
-		3.print big numbers by string.
-	Improve:
-		1.compatible with complex number
-		2.additional mathmatical calculation
-		3.execution speed
-		4.括號
-	Language: CPP
-	Author: HCL at 2014/02/03
-*/
-/**********************************************************************************/
+/**
+   this is the old version of bignumber.h
+   For debug needed, put in current repository
+ **/
+
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -31,13 +21,10 @@ void guxuan(string &bechu, string b, int lo, int lob, vector<int> &ans){//lo = b
      else
           tempb.assign(bechu, 0, ++indexbe);
 
-    
      temp.assign(b, 0, indexb);
      vb = atof(tempb.c_str());
      v = atof(temp.c_str());
      gu = vb / v;
-    
-     //cout<<"guxuan"<<tempb<<" and "<<temp<<endl;
     
      if(indexb < lob){
           vb = vb * 10 + bechu[indexbe] - '0';
@@ -46,7 +33,6 @@ void guxuan(string &bechu, string b, int lo, int lob, vector<int> &ans){//lo = b
     
      while(gu != vb / v){//增
           gu = vb / v;
-     //     cout<<"vb :"<<vb<<"v :"<<v<<endl;
           indexbe++; indexb++;
           if(indexbe >= lo && indexb >= lob)
                break;
@@ -55,7 +41,6 @@ void guxuan(string &bechu, string b, int lo, int lob, vector<int> &ans){//lo = b
      }
     
      tempb.assign(bechu, 0, lo);
-     //cout<<tempb<<" - "<<b<<" * "<<gu;
     
      if(gu != 0){
           if(lob != lo){/*
@@ -113,13 +98,10 @@ void guxuan(string &bechu, string b, int lo, int lob, vector<int> &ans){//lo = b
           for(int j = 1; j < i && !bechu.empty(); j++)
                ans.push_back(0);
          
-          //cout<<" = "<<bechu<<endl;
      }
      else{
           ans.push_back(gu);
      }
-    
-     //刪除0
 }
 
 class BigNumber{
@@ -128,8 +110,8 @@ class BigNumber{
 		BigNumber();
 		BigNumber operator+(BigNumber&);
 		BigNumber operator-(BigNumber&);
-		//BigNumber operator*(BigNumber&);
-		//BigNumber operator()(BigNumber&);
+		BigNumber operator*(BigNumber&);
+		BigNumber operator()(BigNumber&);
 		//BigNumber operator/();
 		void print();
 	private:
@@ -212,25 +194,7 @@ BigNumber BigNumber::operator+(BigNumber &temp){//int + big??
 
 	if(flow)//增加一位
 		ans.push_back(1);
-		
-	/*
-	int way, tempa;
-	lo = ans.size();
-	printf("%d", ans[lo-1]);
-	for(i = lo-2; i >= 0; i--){
-		way = 9; tempa = ans[i];
-		if(ans[i] == 0)
-			 printf("00000000");
-		else{
-			 while(tempa != 0){
-				  tempa /= 10;
-				  way--;}
-			 while(way-- != 0)
-				  putchar("0");
-		}
-		printf("%d", ans[i]);
-	}
-	printf("\n");*/
+
 }
 BigNumber BigNumber::operator-(BigNumber temp){
 	bool change = false;
@@ -257,24 +221,6 @@ BigNumber BigNumber::operator-(BigNumber temp){
 	int way, tempa;
 	lo = ans.size();
 	/* use stringstream to output the result to this->ori, instead of print*/
-	/*
-	if(change)
-		cout<<"-";
-	cout<<ans[lo-1];
-	for(i = lo-2; i >= 0; i--){
-		way = 9; tempa = ans[i];
-		if(ans[i] == 0)
-			cout<<"00000000";
-		else{
-			 while(tempa != 0){
-				  tempa /= 10;
-				  way--;}
-			 while(way-- != 0)
-				  cout<<"0";
-		}
-		cout<<ans[i];
-	}
-	cout<<endl;*/
 }
 
 
@@ -392,7 +338,6 @@ int main(){
                lob = bv.size();
                lo = (loa>lob)?loa:lob;
               
-               //cout<<a << " - "<<b<<endl;
                flow = 0;
                for(i = 0; i < lo; i++){
                     if(i < lob)
@@ -408,10 +353,6 @@ int main(){
                          flow = 0;
                }
          
-               /*
-               if(flow)//進位了
-                    ans.push_back(1);
-               */    
                int way, tempa;
                lo = ans.size();
                if(change)
@@ -513,7 +454,6 @@ int main(){
                               break;
                          bechu.assign(a, 0, lob);
                          if(bechu >= b){
-                              //cout<<"no jinwei"<<endl;
                               guxuan(a, b, lob, lob, ans);
                          }
                          else{
