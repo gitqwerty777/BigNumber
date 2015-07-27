@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "bigNumber.h"
 
+typedef class BigNumber intxx;
+
 int main(){
   char s[30000];
   char str_a[10000], str_b[10000];
