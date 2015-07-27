@@ -36,11 +36,11 @@ using namespace std;
  *    7.http://stackoverflow.com/a/12975602/2678970
  */
 
-//Template classes need to have the method definitions inside the header file. <http://stackoverflow.com/questions/9191210/templates-and-separate-compilation>
-
 class BigNumber{
  public:
-  BigNumber();
+  BigNumber(){
+    this->init("0");
+  }
   template <class T> BigNumber(T);
   BigNumber(vector<int>&, int, bool);
   
@@ -78,32 +78,8 @@ class BigNumber{
   vector<int> vec2; //used in *
 };
 
-BigNumber::BigNumber(){
-  this->init("0");
-}
-template <class T>
-BigNumber::BigNumber(T template_init){
-    string s;
-    stringstream ss; 
-    ss<<template_init;
-    ss>>s;
-    this->init(s);
-}
-template <>
-BigNumber::BigNumber<string>(string s){
-  this->init(s);
-}
-
-template <class T>
-void BigNumber::operator= (T t){
-  BigNumber tempbignumber(t);
-  (*this) = tempbignumber;// call template bignumber
-}
-template <>
-void BigNumber::operator= <BigNumber>(BigNumber replace){
-  this->reset_number(replace.getString());
-}
-
+//Template classes need to have the method definitions inside the header file. <http://stackoverflow.com/questions/9191210/templates-and-separate-compilation>
+#include "bigNumber.hpp"
   
 #endif
 
