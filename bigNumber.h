@@ -20,20 +20,19 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <stdio.h>
 using namespace std;
 
 /*
  *    Known Bug:
  *    0 0 // ok -> by Bignumber() -> prevent real==0
+ *    add NaN
  *    append -> insert
- *    前導0 -> ok
- *    大位數減法 
+ *    前導0(test)
  *    NOW Progress:
- *    3. some constant values (const)
- *    4. statement
+ *    3. use constant values
  *    6. 效能, memory
- *    8. +-* / template
- *    7.http://stackoverflow.com/a/12975602/2678970
+ *            OPERATOR
  */
 
 class BigNumber{
@@ -44,38 +43,51 @@ class BigNumber{
   template <class T> BigNumber(T);
   BigNumber(vector<int>&, int, bool);
   
-  template <class T> void operator=(T);// assign any value into BigNumber structure
-
   BigNumber operator+(BigNumber);//const??
   BigNumber operator-(BigNumber);
   BigNumber operator*(BigNumber);
   BigNumber operator/(BigNumber);
 
+  template <class T> void operator=(T);// assign any value into BigNumber structure
   bool operator>(BigNumber&);
-  bool operator>=(BigNumber&);
   bool operator==(BigNumber&);
-  bool operator!=(BigNumber&);
-  bool operator<(BigNumber&);
-  // TODO: +=, < , ... 
+  bool operator>=(BigNumber& comp){
+    return *this > comp || *this == comp;}
+  bool operator!=(BigNumber& comp){
+    return !(*this == comp);}
+  bool operator<(BigNumber& comp){
+    return !(*this >= comp);}
+  // TODO: +=, -=, *=, /=
   string getString();//get Bignumber in string type
-  void print();
-  void print_line();//print in a line
-  bool check_multiply_divide_negative(bool, bool);
- private: 
-  void reset_number(string);
-  void init(string);
-  bool is_bignumber_abs_greater(BigNumber&);
-  bool is_bignumber_abs_geq(BigNumber&);
-  void make_vector(vector<int>&, int);
-  void make_vector1();
-  void make_vector2();
-  BigNumber minus(BigNumber&);
-  BigNumber add(BigNumber&);
+  void print(){
+    if(neg) putchar('-');
+    printf("%s", this->unsigned_string.c_str());
+  }
+  void print_line(){
+    this->print();
+    puts("");
+  }
+  
+ private:
+
   bool neg; // negative or not
   string unsigned_string;
   int deg; //位數
+
+  void reset_number(string);
+  void init(string);
+  
   vector<int> vec1; //used in +, -
   vector<int> vec2; //used in *
+  void make_vector(vector<int>&, int);
+  void make_vector1();
+  void make_vector2();
+  
+  BigNumber minus(BigNumber&);
+  BigNumber add(BigNumber&);
+  bool is_bignumber_abs_greater(BigNumber&);
+  bool is_bignumber_abs_geq(BigNumber&);
+  bool check_multiply_divide_negative(bool, bool);
 };
 
 //Template classes need to have the method definitions inside the header file. <http://stackoverflow.com/questions/9191210/templates-and-separate-compilation>
