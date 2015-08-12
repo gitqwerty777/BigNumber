@@ -364,10 +364,6 @@ void divide(string ts, string ds, string& ans){
       string_minus(tempt, mult[g]);               
       ts.insert(0, tempt);
     } else { //will get 0, add more digit
-      if(ts.size() + tempt.size() == dsize){//同長度，且被除數較小//??
-	printf("%s, %s, %s\n", ts.c_str(), tempt.c_str(), ds.c_str());
-	break;
-      }
       ans.push_back('0');
     }
   }
