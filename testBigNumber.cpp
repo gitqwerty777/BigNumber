@@ -29,8 +29,12 @@ void test(const char message[], const char as[], int op, const char bs[], const 
     c=a-b;
     break;
   case 6:
+    success = a<b;
+    c=a-b;
+    break;
+  case 7:
     a = b;
-    success = (a == c);
+    success = (a == ans);
     c = a;
     break;
   }
@@ -73,24 +77,6 @@ int main(){
     test("test <", "-123213131231231230000000000", 6, "-123213111231231230000000000", "0");
 
     test("test =", "123131231231231231", 7, "1122233344455", "1122233344455");
-    
-    /*
-      while(scanf("%s %s", str_a, str_b) == 2){
-    if(strcmp(str_a, "exit") == 0)
-      break;
-    intxx a(str_a);
-    intxx b(str_b);
-    intxx c, d, e, f;
-    puts("user test1");
-    c = a + b;
-    c.print_line();
-    d = a - b;
-    d.print_line();
-    e = a * b;
-    e.print_line();
-    f = a / b;
-    f.print_line();
-  }
-    */
+
   return 0;
 } 

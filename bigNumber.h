@@ -24,15 +24,16 @@
 using namespace std;
 
 /*
- *    Known Bug:
- *    0 0 // ok -> by Bignumber() -> prevent real==0
+ Known Bug:
+ 
+ Known Issue:
  *    add NaN
  *    append -> insert
  *    前導0(test)
- *    NOW Progress:
- *    3. use constant values
- *    6. 效能, memory
- *            OPERATOR
+ *    performance and memory
+ *    OPERATORs (+= , -= , *= , /=)
+ NOW Progress:
+ 
  */
 
 class BigNumber{
@@ -45,8 +46,9 @@ class BigNumber{
   
   BigNumber operator+(BigNumber);//const??
   BigNumber operator-(BigNumber);
+  BigNumber operator-();//unary minus
   BigNumber operator*(BigNumber);
-  BigNumber operator/(BigNumber);
+  BigNumber operator/(BigNumber&);
 
   template <class T> void operator=(T);// assign any value into BigNumber structure
   bool operator>(BigNumber&);
@@ -59,6 +61,13 @@ class BigNumber{
     return !(*this >= comp);}
   // TODO: +=, -=, *=, /=
   string getString();//get Bignumber in string type
+  bool absSmaller(BigNumber& comp){
+    BigNumber absnum(*this);
+    absnum.neg = false;
+    BigNumber abscomp(comp);
+    abscomp.neg = false;
+    return absnum < abscomp;
+  }
   void print(){
     if(neg) putchar('-');
     printf("%s", this->unsigned_string.c_str());
@@ -85,9 +94,9 @@ class BigNumber{
   
   BigNumber minus(BigNumber&);
   BigNumber add(BigNumber&);
+  void reverseSign();
   bool is_bignumber_abs_greater(BigNumber&);
   bool is_bignumber_abs_geq(BigNumber&);
-  bool check_multiply_divide_negative(bool, bool);
 };
 
 //Template classes need to have the method definitions inside the header file. <http://stackoverflow.com/questions/9191210/templates-and-separate-compilation>

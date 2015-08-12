@@ -11,54 +11,53 @@
 #define MAX_VEC2 10000
 using namespace std;
 
-string my_to_string(int v){
-  //temps = std::to_string(vec[lo-1]); //so good!! but there are some bug by using g++
+string myToString(int v){
+  //temps = std::to_string(v); //so good!! but there are some bug when using g++
   char tempc[14];
   sprintf(tempc, "%d", v);
   return string(tempc);
 }
-void vector_to_string(vector<int> &vec, string &signed_string, int real, string append_zero, int ori_way, int i_end){
-  for(int i = real-1; i >= i_end; i--){
+void VectorToString(vector<int> &vec, string &signed_string, int realstart, string append_zero, int ori_way, int i_end){
+  for(int i = realstart-1; i >= i_end; i--){
     int temp = vec[i];
     if(temp == 0)
       signed_string.append(append_zero);
     else{
-      //test
-      //ref: http://stackoverflow.com/a/4133356
 	char t[15];
-	sprintf(t, "%0*d", ori_way, vec[i]);
+	sprintf(t, "%0*d", ori_way, vec[i]); //ref: http://stackoverflow.com/a/4133356
 	signed_string.append(string(t));
     }
   }
 }
-BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//!!not ok//type 1 = +, - , 2 = * //12345678999 12345678900
+BigNumber::BigNumber(vector<int> &vec, int type, bool neg){//type 1 = add/minus,2 = multiply //12345678999 12345678900
   string signed_string;
-  signed_string.clear();//!!?????!!
   if(neg)
-    signed_string.insert(0, "-");//!!
+    signed_string.insert(0, "-");
   int lo = vec.size();
-  int real = lo-1;
-  while(vec[real] == 0 && real > 0)//prevent real==-1
-    real--;
-  signed_string.append(my_to_string(vec[real]));
-  string append_zero;
-  int way;
-  int i_end;
+  int realstart = lo-1;
+  while(vec[realstart] == 0 && realstart > 0)
+    realstart--;
+  signed_string.append(myToString(vec[realstart]));
+  string append_zero;  int way;  int i_end;
   if(type == 1){
-    append_zero = "000000000";//test: add additional zero -> yes, it need 9 zero
+    append_zero = "000000000";
     way = 9;
     i_end = 0;
   } else if(type == 2){
     append_zero = "0000";
     way = 4;
-    i_end = 2;
+    i_end = 2;// two zero that append at make_vector2()
   } else {
-    printf("type error!\n");
+    fprintf(stderr, "type error!\n");
+    exit(1);
     return;
   }
-  vector_to_string(vec, signed_string, real, append_zero, way, i_end);
-  //printf("signed_string = %s\n", signed_string.c_str());
+  VectorToString(vec, signed_string, realstart, append_zero, way, i_end);
   this->init(signed_string);
+}
+
+void BigNumber::reset_number(string s){
+  this->init(s);
 }
 
 void BigNumber::init(string s){
@@ -68,27 +67,30 @@ void BigNumber::init(string s){
   } else {
     neg = false;
   }
-  while(s[0] == '0' && s[1] != '\0'){
+  while(s[0] == '0')
     s.erase(0,1);
-  }
+  if(s == "")
+    s = string("0");
   this->unsigned_string = s;
   this->deg = s.size();
   this->make_vector1();
   this->make_vector2();
   return;
 }
-void BigNumber::make_vector1(){
+void BigNumber::make_vector1(){//make vector for add/minus
   this->make_vector(this->vec1, 9);
 }
-void BigNumber::make_vector2(){
+void BigNumber::make_vector2(){//make vector for multiply/divide
   this->make_vector(this->vec2, 4);
-  this->vec2.insert(this->vec2.begin(), 0);//this zero is for ?? i don't know why... maybe look original code again?
+  this->vec2.insert(this->vec2.begin(), 0);//multiply should start from 1
 }
 void BigNumber::make_vector(vector<int>& vec, int maxdeg){
-  //stringstream is much slower than atof, so no use stringstream  //ref: http://tinodidriksen.com/2011/05/28/cpp-convert-string-to-double-speed/
   vec.clear();
   string temp, unsigned_string = this->unsigned_string;
   int count = this->deg;
+  //convert string into ints, by reverse order
+  //maxdeg is largest degree that every int has
+  // e.g. , makevector(, 4) = 2147483647 -> 3647, 4748, 21
   do{
     count -= maxdeg;
     if(count > 0)
@@ -96,7 +98,7 @@ void BigNumber::make_vector(vector<int>& vec, int maxdeg){
     else
       temp.assign(unsigned_string, 0, count + maxdeg);//end of string
     vec.push_back(atof(temp.c_str()));
-  }while(count > 0);//check
+  }while(count > 0);
 }
 
 int compare_string_abs(string a, string b){
@@ -157,11 +159,8 @@ bool BigNumber::operator==(BigNumber &comp){
   if(this->neg != comp.neg || this->deg != comp.deg){
     return false;  
   } else {
-    for(int i = 0; i < this->deg; i++)
-      if(this->unsigned_string[i] != comp.unsigned_string[i])
-	return false;
+    return (this->unsigned_string == comp.unsigned_string);
   }
-  return true;
 }
 
 string BigNumber::getString(){
@@ -170,12 +169,6 @@ string BigNumber::getString(){
     signed_string.insert(0, "-");
   return signed_string;
 }
-
-void BigNumber::reset_number(string s){
-  this->init(s);
-}
-
-
 
 // add and minus: doesn't consider positive and negative
 BigNumber BigNumber::add(BigNumber& added){
@@ -256,51 +249,56 @@ BigNumber BigNumber::minus(BigNumber& minused){//TODO:小減大problem
   return BigNumber(ans, 1, !is_ans_pos);
 }
 
+
 BigNumber BigNumber::operator+(BigNumber added){//only consider sign
   if(this->neg && !added.neg){// -a + +b => b - a
     return added.minus(*this);//minus 不看 兩數之正負
   } else if(!this->neg && added.neg){//+a + -b => a - b
     return this->minus(added);
-  } else { // 一般 (+) + (+) or (-) + (-)
+  } else { // (+) + (+) or (-) + (-)
     return this->add(added);
   }
 }
-
-BigNumber BigNumber::operator-(BigNumber minused){
-  //TODO: refact to reverseSign()
-  minused.neg = !minused.neg;//被減數變號，然後相加
+BigNumber BigNumber::operator-(BigNumber minused){// a - b = a + (-b)
+  minused.reverseSign();
   return (*this) + minused;
 }
+BigNumber BigNumber::operator-(){ //unary minus
+  BigNumber tmp = BigNumber(*this);
+  tmp.reverseSign();
+  return tmp;
+}
+inline void BigNumber::reverseSign(){
+  this->neg = !this->neg;
+}
 
-
+inline bool XOR(bool a, bool b){
+  return (a||b) && !(a&&b);
+}
 BigNumber BigNumber::operator*(BigNumber multiplier){
+  if(this->unsigned_string == "0" || multiplier.unsigned_string == "0")//ans = zero
+    return BigNumber("0");
+
   int loa = this->vec2.size();
   int lob = multiplier.vec2.size();
   int lo = (loa>lob)?loa:lob;
-  std::vector<int> ans;
 
-  bool isneg;
-  if(this->unsigned_string == "0" || multiplier.unsigned_string == "0")//ans = zero
-    return BigNumber("0");
-  else{
-    isneg = check_multiply_divide_negative(this->neg, multiplier.neg);
-          
-    ans.assign(loa + lob, 0);//initialized to zero
-    for(int i = 1; i < loa; i++)//start from 1
-      for(int j = 1; j < lob; j++)
-	ans[i+j] += (this->vec2[i] * multiplier.vec2[j]);
-    //最後再進位即可！
-    lo = ans.size();
-    for(int i = 0; i < lo; i++)
-      if(ans[i] >= MAX_VEC2){
-	ans[i+1] += ans[i] / MAX_VEC2;
-	ans[i] %= MAX_VEC2;
-      }
-  }
+  bool isneg = XOR(this->neg, multiplier.neg);
+
+  std::vector<int> ans;
+  ans.assign(loa + lob, 0);//initialized to zero
+  //TODO: find way to make index start from 0
+  for(int i = 1; i < loa; i++)//should start from 1
+    for(int j = 1; j < lob; j++)
+      ans[i+j] += (this->vec2[i] * multiplier.vec2[j]);
+  //carry
+  lo = ans.size();
+  for(int i = 0; i < lo; i++)
+    if(ans[i] >= MAX_VEC2){
+      ans[i+1] += ans[i] / MAX_VEC2;
+      ans[i] %= MAX_VEC2;
+    }
   return BigNumber(ans, 2, isneg);
-}
-inline bool BigNumber::check_multiply_divide_negative(bool a, bool b){
-  return (a||b) && !(a&&b);
 }
 
 int new_guxuan(string tempt, vector<string>& mult){//binary?? // calculate the number of multiply
@@ -328,44 +326,42 @@ void string_minus(string& a, string b){
   }
 }
 void divide(string ts, string ds, string& ans){
-  int ts_size = ts.size();
-  int ds_size = ds.size();
   vector<string> mult(10);
   BigNumber ds_Big = BigNumber(ds);
-  for(int i = 1; i < 10; i++){
+  for(int i = 1; i < 10; i++)
     mult[i] = (BigNumber(i) * ds_Big).getString();
-  }
+
+  int tsize = ts.size();
+  int dsize = ds.size();
+  const int MAXDEGREE = tsize - dsize + 1;
 
   string tempt;
-  const int MAX_ANS_DEGREE = ts_size - ds_size + 1;
-          
-  for(int i = 0 ; i < MAX_ANS_DEGREE; i++){
-    if(ts.size() < ds_size)
+  for(int i = 0 ; i < MAXDEGREE; i++){
+    if(ts.size() < dsize)//ts.size() will change
       break;
     if(i == 0)
-      tempt.assign(ts, 0, ds_size);//先取ds_size個數的數 //改成多加一位的方式
+      tempt.assign(ts, 0, dsize);//add dsize digit at first time
     else
-      tempt.push_back(ts[tempt.size()]);
+      tempt.push_back(ts[tempt.size()]);//add one digit each iteration
 
-    if(is_string_abs_geq(tempt, ds)){//被除數較大
-      int g = new_guxuan(tempt, mult);
+    if(is_string_abs_geq(tempt, ds)){
+      int g = new_guxuan(tempt, mult);// can calculate
       ans.push_back('0' + g);
                
       int tempt_size = tempt.size();
       string_minus(tempt, mult[g]);
       ts.erase(0, tempt_size);
       ts.insert(0, tempt);
-    } else {//被除數較小
-      if(ts.size() + tempt.size() == ds_size)//同長度，且被除數較小//TODO: know
+    } else {
+      if(ts.size() + tempt.size() == dsize)//同長度，且被除數較小//TODO: know
 	break;
       //加一位，再算
       ans.push_back('0');
     }
-    // printf("nowans: %s, ts = %s\n", ans.c_str(), ts.c_str());
   }
   //補後方0
   int ans_size = ans.size();
-  for(int i = 0; i < MAX_ANS_DEGREE - ans_size; i++){
+  for(int i = 0; i < MAXDEGREE - ans_size; i++){
     ans.push_back('0');
   }
   //去除前方0
@@ -374,30 +370,24 @@ void divide(string ts, string ds, string& ans){
   }
 }
 
-BigNumber BigNumber::operator/(BigNumber devidend){//not sure
+BigNumber BigNumber::operator/(BigNumber& divisor){//not sure
   int loa = this->vec2.size();
-  int lob = devidend.vec2.size();
+  int lob = divisor.vec2.size();
   int lo = (loa>lob)?loa:lob;
 
-  if(devidend.unsigned_string == "0"){
+  //special case
+  if(divisor.unsigned_string == "0"){
     puts("Invalid operation: Divide by zero");
     return BigNumber("");//TODO:NAN
-  } else if(this->unsigned_string == "0" || loa < lob){//除數 = 0？
+  } else if(this->absSmaller(divisor) || this->unsigned_string == "0"){
     return BigNumber("0");
-  } else if(loa == lob){//同長度
-    for(int i = loa-1; i >= 0;i--){
-      if(this->vec2[i] < devidend.vec2[i])
-	return BigNumber("0");
-      else if(this->vec2[i] > devidend.vec2[i])
-	break;
-    }
   }
 
-  bool isneg = check_multiply_divide_negative(this->neg, devidend.neg);
-
   string ans;
+  bool isneg = XOR(this->neg, divisor.neg);
+
   if(isneg)
     ans.insert(0, "-");
-  divide(this->unsigned_string, devidend.unsigned_string, ans);
+  divide(this->unsigned_string, divisor.unsigned_string, ans);
   return BigNumber(ans);
 }
