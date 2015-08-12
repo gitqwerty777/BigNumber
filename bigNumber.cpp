@@ -80,7 +80,7 @@ void BigNumber::init(string s){
 void BigNumber::make_vector1(){//make vector for add/minus
   this->make_vector(this->vec1, 9);
 }
-void BigNumber::make_vector2(){//make vector for multiply/divide
+void BigNumber::make_vector2(){//make vector for multiply
   this->make_vector(this->vec2, 4);
   this->vec2.insert(this->vec2.begin(), 0);//multiply should start from 1
 }
@@ -301,15 +301,29 @@ BigNumber BigNumber::operator*(BigNumber multiplier){
   return BigNumber(ans, 2, isneg);
 }
 
-int new_guxuan(string tempt, vector<string>& mult){//binary?? // calculate the number of multiply
-  //int start = 1, end = 9;
-  //int mid = (start + end) / 2;
-  //while(mid)
-  for(int i = 9; i >= 1; i--){
-    if(is_string_abs_geq(tempt, mult[i]))//if(tempt >= mult[i]), 有算degree??
-      return i;
+int estimate(string tempt, vector<string>& mult){
+  //binary search version
+  int start = 9, end = 1;
+  int mid = (start+end)/2;
+  while(start > end){
+    if(is_string_abs_geq(tempt, mult[mid])){
+      if(mid+1 <= 9 && is_string_abs_geq(tempt, mult[mid+1]))
+	end = mid+1;
+      else
+	return mid;
+    }
+    else
+      start = mid-1;
+    mid = (start+end)/2;
   }
+  return mid;
+  /*
+  //linear search version
+  for(int i = 9; i >= 1; i--)
+    if(is_string_abs_geq(tempt, mult[i]))
+      return i;
   return -1;
+  */
 }
 void string_minus(string& a, string b){
   int a_size = a.size()-1;//index
@@ -321,9 +335,8 @@ void string_minus(string& a, string b){
       a[a_size-i-1] -= 1;
     }
   }
-  while(a[0] == '0'){
+  while(a[0] == '0')
     a.erase(0, 1);
-  }
 }
 void divide(string ts, string ds, string& ans){
   vector<string> mult(10);
@@ -345,29 +358,25 @@ void divide(string ts, string ds, string& ans){
       tempt.push_back(ts[tempt.size()]);//add one digit each iteration
 
     if(is_string_abs_geq(tempt, ds)){
-      int g = new_guxuan(tempt, mult);// can calculate
+      int g = estimate(tempt, mult);
       ans.push_back('0' + g);
-               
-      int tempt_size = tempt.size();
-      string_minus(tempt, mult[g]);
-      ts.erase(0, tempt_size);
+      ts.erase(0, tempt.size());
+      string_minus(tempt, mult[g]);               
       ts.insert(0, tempt);
-    } else {
-      if(ts.size() + tempt.size() == dsize)//同長度，且被除數較小//TODO: know
+    } else { //will get 0, add more digit
+      if(ts.size() + tempt.size() == dsize){//同長度，且被除數較小//??
+	printf("%s, %s, %s\n", ts.c_str(), tempt.c_str(), ds.c_str());
 	break;
-      //加一位，再算
+      }
       ans.push_back('0');
     }
   }
-  //補後方0
+
   int ans_size = ans.size();
-  for(int i = 0; i < MAXDEGREE - ans_size; i++){
+  for(int i = 0; i < MAXDEGREE - ans_size; i++)//can't be divided at last, add 0
     ans.push_back('0');
-  }
-  //去除前方0
-  while(ans[0] == '0'){
+  while(ans[0] == '0')//remove previous 0
     ans.erase(0, 1);
-  }
 }
 
 BigNumber BigNumber::operator/(BigNumber& divisor){//not sure
