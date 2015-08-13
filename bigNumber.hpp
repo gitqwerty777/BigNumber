@@ -19,13 +19,15 @@ inline BigNumber::BigNumber<string>(string s){
 }
 
 template <class T>
-void BigNumber::operator= (T t){
+inline BigNumber BigNumber::operator= (T t){
   (*this) = BigNumber(t);// call template bignumber
+  return (*this);
 }
 
 template <>
-inline void BigNumber::operator= <BigNumber>(BigNumber replace){
+inline BigNumber BigNumber::operator= <BigNumber>(BigNumber replace){
   this->reset_number(replace.getString()); // why not use = ?
+  return (*this);
 }
 
 #endif
