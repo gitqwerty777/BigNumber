@@ -1,7 +1,7 @@
 BigNumber
 =========
 
-[master branch status](https://travis-ci.org/gitqwerty777/BigNumber.svg?branch=master)
+![master branch status](https://travis-ci.org/gitqwerty777/BigNumber.svg?branch=master)
 
 Some useful functions to deal with big integer number(bigger than long long)
 
