@@ -7,8 +7,6 @@
 #include <string>
 #include <string.h>
 #include <stdio.h>
-#define MAX_VEC1 1000000000
-#define MAX_VEC2 10000
 using namespace std;
 
 string myToString(int v);
@@ -103,7 +101,7 @@ inline void BigNumber::reverseSign(){
   this->neg = !this->neg;
 }
 
-BigNumber BigNumber::operator*(BigNumber multiplier){
+BigNumber BigNumber::operator*(const BigNumber& multiplier){
   if(this->unsigned_string == "0" || multiplier.unsigned_string == "0")//ans = zero
     return BigNumber("0");
 
@@ -136,8 +134,8 @@ BigNumber BigNumber::operator/(BigNumber& divisor){//not sure
 
   //special case
   if(divisor.unsigned_string == "0"){
-    puts("Invalid operation: Divide by zero");
-    return BigNumber("");//TODO:NAN
+    puts("Invalid operation: Divide by zero");//TODO: NAN
+    exit(0);
   } else if(this->isAbsSmaller(divisor) || this->unsigned_string == "0"){
     return BigNumber("0");
   }

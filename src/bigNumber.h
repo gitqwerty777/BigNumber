@@ -4,13 +4,7 @@
      1.transform other type(string, int, double...) into big number structure, or transform big number structure to string
      2.basic calculation(+, -, *, /)
      3.basic operation(=, >, <, ==, !=...)
-     TODO:
-     1.complex number
-     2.additional mathmatical calculation, like %, ^
-     3.improve execution speed
-     4.input with calculation form, parse and output the answer
-     Language: CPP
-     Author: HCL, 2014/02/03 
+     first version: 2014/02/03 
 */
 /**********************************************************************************/
 
@@ -21,34 +15,26 @@
 #include <string>
 #include <sstream>
 #include <stdio.h>
-using namespace std;
 
-/*
- Known Bug:
- 
- Known Issue:
- *    add NaN
- *    append -> insert
- *    前導0(test)
- *    performance and memory
- *    OPERATORs (+= , -= , *= , /=)
- NOW Progress:
- */
+#define MAX_VEC1 1000000000
+#define MAX_VEC2 10000
+
+using namespace std;
 
 class BigNumber{
  public:
-  BigNumber(){this->init("0");}
-  template <class T> BigNumber(T);
-  BigNumber(vector<int>&, int, bool);
-  
-  BigNumber operator+(BigNumber);//TODO: need const argument?
+  //input
+  BigNumber(){this->init("0");}//initial = 0
+  template <class T> BigNumber(T);//can use any type that can be printed as number
+  template <class T> BigNumber operator=(T);
+
+  BigNumber abs();
+  //TODO: use reference
+  BigNumber operator+(BigNumber);
   BigNumber operator-(BigNumber);
   BigNumber operator-();//unary minus
-  BigNumber operator*(BigNumber);
+  BigNumber operator*(const BigNumber&);
   BigNumber operator/(BigNumber&);
-  BigNumber abs();
-
-  template <class T> BigNumber operator=(T);
   bool operator>(BigNumber&);
   bool operator==(BigNumber&);
   bool operator>=(BigNumber& comp){return *this > comp || *this == comp;}
@@ -56,9 +42,12 @@ class BigNumber{
   bool operator<(BigNumber& comp){return !(*this >= comp);}
   bool isAbsSmaller(BigNumber& comp);
   bool isAbsGreater(BigNumber&);
-  // TODO: +=, -=, *=, /=
-  
-  string getString();//get value in string type
+  BigNumber operator+=(BigNumber& comp){return (*this) + comp;}
+  BigNumber operator-=(BigNumber& comp){return (*this) - comp;}
+  BigNumber operator*=(BigNumber& comp){return (*this) * comp;}
+  BigNumber operator/=(BigNumber& comp){return (*this) / comp;}
+  //output
+  string getString();//get value as string 
   void print(){if(neg) putchar('-'); printf("%s", this->unsigned_string.c_str());}
   void print_line(){this->print(); puts("");}
   
@@ -66,13 +55,14 @@ class BigNumber{
   bool neg;
   string unsigned_string;
   int deg; //位數 //TODO: is it used?
-
+    
   void reset_number(string);
   void init(string);
+  BigNumber(vector<int>&, int, bool);
 
-  void make_vector(vector<int>&, int);
   vector<int> vec1; //used in +, -
   vector<int> vec2; //used in *
+  void make_vector(vector<int>&, int);
   void make_vector1();
   void make_vector2();
   

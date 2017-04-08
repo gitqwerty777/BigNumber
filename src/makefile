@@ -1,4 +1,4 @@
-CFLAGS=--coverage -g
+CFLAGS=--coverage -g -O3 -march=native
 
 main: testBigNumber manualTestBigNumber
 

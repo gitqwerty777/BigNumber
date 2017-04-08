@@ -1,0 +1,9 @@
+* add NaN
+* 前導0
+  test
+* additional mathmatical calculation, like %, ^
+* input with calculation form, parse and output the answer
+* improve execution speed
+** performance and memory record
+** test?
+* complex number

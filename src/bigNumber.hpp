@@ -6,7 +6,7 @@ BigNumber::BigNumber(T template_init){
   string s;
   stringstream ss; 
   ss<<template_init;
-  ss>>s;
+  ss>>s;//read as string
   this->init(s);
 }
 
